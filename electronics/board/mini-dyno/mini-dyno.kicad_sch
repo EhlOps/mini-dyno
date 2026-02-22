@@ -10313,7 +10313,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD"
 			(at 146.05 163.5252 0)
 			(effects
 				(font
