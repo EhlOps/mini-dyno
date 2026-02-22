@@ -2,7 +2,7 @@
 "C1,C5,C6,C8,C9","5","10uF","","","","Capacitor_SMD:C_0805_2012Metric","~"
 "C2,C4,C7,C10,C12","5","0.1uF","","","","Capacitor_SMD:C_0805_2012Metric","~"
 "C3","1","1uF","","","","Capacitor_SMD:C_0805_2012Metric","~"
-"C11","1","100uF","","","","easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD","~"
+"C11","1","35ZLH100MEFC6.3X11","","","","easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD","https://lcsc.com/product-detail/Aluminum-Electrolytic-Capacitors-Leaded_Rubycon_35ZLH100MEFC6-3X1_100uF-107-20-35V_C109392.html"
 "D1","1","ESD122DMYR","","","","easyeda2kicad:X2SON-3_L1.3-W0.6-L",""
 "D2","1","SMBJ5.0A_C83333","","","","easyeda2kicad:SMB_L4.6-W3.6-LS5.3-RD","https://lcsc.com/product-detail/Others_Littelfuse_SMBJ5-0A_Littelfuse-SMBJ5-0A_C83333.html"
 "D3","1","LED_ON","","","","LED_THT:LED_D5.0mm","~"

@@ -2130,6 +2130,174 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "easyeda2kicad:35ZLH100MEFC6.3X11"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C"
+				(at 0 5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "35ZLH100MEFC6.3X11"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD"
+				(at 0 -7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://lcsc.com/product-detail/Aluminum-Electrolytic-Capacitors-Leaded_Rubycon_35ZLH100MEFC6-3X1_100uF-107-20-35V_C109392.html"
+				(at 0 -10.16 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC Part" "C109392"
+				(at 0 -12.7 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "35ZLH100MEFC6.3X11_0_1"
+				(polyline
+					(pts
+						(xy -2.54 0.76) (xy -1.52 0.76)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.03 1.27) (xy -2.03 0.25)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 0) (xy -0.51 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.51 2.03) (xy -0.51 -2.03)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.51 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 1.21 -1.83)
+					(mid 1.188 0.0626)
+					(end 1.33 1.95)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin input line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "easyeda2kicad:916-252A2023Y10200"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -4362,12 +4530,6 @@
 		(uuid "7892f1a8-8fb7-40de-bcc7-0c05f8061cea")
 	)
 	(junction
-		(at 146.05 162.56)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "78ab6c72-78f9-488d-ae41-416270ee4c55")
-	)
-	(junction
 		(at 33.02 91.44)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4474,6 +4636,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "ed0a7e59-7038-48a1-8603-3f8e2694094c")
+	)
+	(junction
+		(at 146.05 162.56)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f42b8f9e-161b-433e-b9dc-75673897e29e")
 	)
 	(junction
 		(at 194.31 137.16)
@@ -5275,16 +5443,6 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 162.56) (xy 146.05 168.91)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "77b298f2-b3dc-4e61-8f88-cb9b333abbbf")
-	)
-	(wire
-		(pts
 			(xy 40.64 157.48) (xy 41.91 157.48)
 		)
 		(stroke
@@ -5492,6 +5650,16 @@
 			(type default)
 		)
 		(uuid "98386803-e777-47d7-8a21-4ef567cc227c")
+	)
+	(wire
+		(pts
+			(xy 146.05 162.56) (xy 146.05 168.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "99acd3dd-f5ba-4e34-a613-98540a44a55d")
 	)
 	(wire
 		(pts
@@ -6411,6 +6579,83 @@
 			(project "mini-dyno"
 				(path "/2187563e-ed7c-448b-a062-1766b86d965d"
 					(reference "#PWR029")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "easyeda2kicad:35ZLH100MEFC6.3X11")
+		(at 149.86 162.56 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0aeb6b60-80c6-44fd-869f-073b87e1c695")
+		(property "Reference" "C11"
+			(at 149.255 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "35ZLH100MEFC6.3X11"
+			(at 149.255 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD"
+			(at 149.86 170.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://lcsc.com/product-detail/Aluminum-Electrolytic-Capacitors-Leaded_Rubycon_35ZLH100MEFC6-3X1_100uF-107-20-35V_C109392.html"
+			(at 149.86 172.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 149.86 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC Part" "C109392"
+			(at 149.86 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "081b711d-c5a4-45ee-a11d-eccf9a2a2db3")
+		)
+		(pin "2"
+			(uuid "e77631db-e841-47f3-aa08-dd8c5c87819a")
+		)
+		(instances
+			(project ""
+				(path "/2187563e-ed7c-448b-a062-1766b86d965d"
+					(reference "C11")
 					(unit 1)
 				)
 			)
@@ -10281,75 +10526,6 @@
 			(project "mini-dyno"
 				(path "/2187563e-ed7c-448b-a062-1766b86d965d"
 					(reference "#PWR07")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 149.86 162.56 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "98d2bcea-4169-4b15-a069-0759f81e6acb")
-		(property "Reference" "C11"
-			(at 156.464 157.988 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "100uF"
-			(at 157.988 160.02 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "easyeda2kicad:CAP-TH_BD6.3-P2.50-D1.0-FD"
-			(at 146.05 163.5252 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 149.86 162.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 149.86 162.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "b5b706d0-ff22-467e-8661-6512617e420a")
-		)
-		(pin "1"
-			(uuid "be332041-9157-4ac9-9267-8baafc050fa5")
-		)
-		(instances
-			(project "mini-dyno"
-				(path "/2187563e-ed7c-448b-a062-1766b86d965d"
-					(reference "C11")
 					(unit 1)
 				)
 			)
