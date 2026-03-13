@@ -1,0 +1,34 @@
+menu "HX711 Load Cell ADC"
+
+    config HX711_DEFAULT_CLK_GPIO
+        int "Default PD_SCK GPIO number"
+        default 4
+        range 0 48
+        help
+            GPIO number connected to the HX711 PD_SCK (clock) pin.
+            Can be overridden at runtime via hx711_config_t.clk_gpio.
+
+    config HX711_DEFAULT_DATA_GPIO
+        int "Default DOUT GPIO number"
+        default 5
+        range 0 48
+        help
+            GPIO number connected to the HX711 DOUT (data) pin.
+            Can be overridden at runtime via hx711_config_t.data_gpio.
+
+    choice HX711_DEFAULT_GAIN
+        prompt "Default channel / gain selection"
+        default HX711_DEFAULT_GAIN_A_128
+        help
+            Selects the input channel and PGA gain used after initialisation.
+            Channel A supports gains of 64 or 128; Channel B supports gain 32.
+
+        config HX711_DEFAULT_GAIN_A_128
+            bool "Channel A, gain 128 (highest sensitivity)"
+        config HX711_DEFAULT_GAIN_B_32
+            bool "Channel B, gain 32"
+        config HX711_DEFAULT_GAIN_A_64
+            bool "Channel A, gain 64"
+    endchoice
+
+endmenu

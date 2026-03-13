@@ -1,0 +1,25 @@
+menu "WiFi AP / WebSocket Server"
+
+    config WIFI_AP_SSID
+        string "Access Point SSID"
+        default "mini-dyno"
+        help
+            The SSID that the ESP32-C3 will broadcast. Mobile devices connect to this.
+
+    config WIFI_AP_PASSWORD
+        string "Access Point Password"
+        default ""
+        help
+            WPA2 password. Leave empty for an open (no-password) network.
+
+    config WIFI_AP_CHANNEL
+        int "WiFi Channel"
+        default 1
+        range 1 13
+
+    config WIFI_AP_MAX_CLIENTS
+        int "Maximum simultaneous stations"
+        default 4
+        range 1 8
+
+endmenu
