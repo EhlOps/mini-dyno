@@ -324,7 +324,7 @@ esp_err_t hx711_wait_ready(hx711_handle_t handle, uint32_t timeout_ms)
             ESP_LOGW(TAG, "wait_ready timeout after %" PRIu32 " ms", timeout_ms);
             return ESP_ERR_TIMEOUT;
         }
-        vTaskDelay(pdMS_TO_TICKS(HX711_POLL_INTERVAL_MS));
+        vTaskDelay(1); /* yield at least 1 tick regardless of tick rate */
     }
 
     return ESP_OK;

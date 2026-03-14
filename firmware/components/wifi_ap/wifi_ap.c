@@ -47,6 +47,16 @@ typedef struct {
  * ---------------------------------------------------------------------- */
 
 /**
+ * @brief Handles GET /ping — used by the iOS app to check connectivity.
+ */
+static esp_err_t ping_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_sendstr(req, "pong");
+    return ESP_OK;
+}
+
+/**
  * @brief Handles the /ws URI.
  *
  * On an HTTP GET the server performs the WebSocket upgrade automatically
@@ -235,6 +245,16 @@ esp_err_t wifi_ap_init(const wifi_ap_cfg_t *config,
         esp_wifi_stop();
         esp_wifi_deinit();
         return ret;
+    }
+
+    httpd_uri_t ping_uri = {
+        .uri     = "/ping",
+        .method  = HTTP_GET,
+        .handler = ping_handler,
+    };
+    ret = httpd_register_uri_handler(httpd, &ping_uri);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "register ping handler failed: %s", esp_err_to_name(ret));
     }
 
     ESP_LOGI(TAG, "WebSocket server ready at ws://192.168.4.1/ws");
