@@ -76,13 +76,13 @@ class WebSocketService {
     }
     
     private func parseData(_ data: Data) {
-        // Expected JSON format from firmware: {"w":<grams>, "t":<ms>}
+        // Expected JSON format from firmware: {"torque":<Nm>, "rpm":<RPM>}
         do {
             if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let weightGrams = json["w"] as? Double,
-               let timestampMs = json["t"] as? Double {
+               let torqueNm = json["torque"] as? Double,
+               let rpm = json["rpm"] as? Double {
 
-                onDataReceived?(weightGrams, timestampMs)
+                onDataReceived?(torqueNm, rpm)
             }
         } catch {
             lastError = "Failed to parse data: \(error.localizedDescription)"

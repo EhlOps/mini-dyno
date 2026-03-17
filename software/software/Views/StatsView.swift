@@ -17,10 +17,10 @@ struct StatsView: View {
             if useVerticalLayout {
                 VStack(spacing: 0) {
                     StatCard(
-                        title: "Peak Force",
-                        value: String(format: "%.0f", session.peakForce),
-                        unit: "g",
-                        subtitle: String(format: "@ %.1f s", session.timeAtPeakForce),
+                        title: "Peak Torque",
+                        value: String(format: "%.1f", session.peakTorque),
+                        unit: "Nm",
+                        subtitle: String(format: "@ %.0f RPM", session.rpmAtPeakTorque),
                         color: .red
                     )
 
@@ -28,11 +28,11 @@ struct StatsView: View {
                         .padding(.horizontal, 8)
 
                     StatCard(
-                        title: "Avg Force",
-                        value: String(format: "%.0f", session.averageForce),
-                        unit: "g",
-                        subtitle: "",
-                        color: .orange
+                        title: "Peak Power",
+                        value: String(format: "%.1f", session.peakPower),
+                        unit: "hp",
+                        subtitle: String(format: "@ %.0f RPM", session.rpmAtPeakPower),
+                        color: .blue
                     )
 
                     Divider()
@@ -50,10 +50,10 @@ struct StatsView: View {
             } else {
                 HStack(spacing: 0) {
                     StatCard(
-                        title: "Peak Force",
-                        value: String(format: "%.0f", session.peakForce),
-                        unit: "g",
-                        subtitle: String(format: "@ %.1f s", session.timeAtPeakForce),
+                        title: "Peak Torque",
+                        value: String(format: "%.1f", session.peakTorque),
+                        unit: "Nm",
+                        subtitle: String(format: "@ %.0f RPM", session.rpmAtPeakTorque),
                         color: .red
                     )
 
@@ -61,11 +61,11 @@ struct StatsView: View {
                         .padding(.vertical, 8)
 
                     StatCard(
-                        title: "Avg Force",
-                        value: String(format: "%.0f", session.averageForce),
-                        unit: "g",
-                        subtitle: "",
-                        color: .orange
+                        title: "Peak Power",
+                        value: String(format: "%.1f", session.peakPower),
+                        unit: "hp",
+                        subtitle: String(format: "@ %.0f RPM", session.rpmAtPeakPower),
+                        color: .blue
                     )
 
                     Divider()
@@ -125,9 +125,9 @@ struct StatCard: View {
 #Preview {
     let session = DynoSession()
     session.dataPoints = [
-        DynoDataPoint(elapsedSeconds: 1.0, forceGrams: 1200),
-        DynoDataPoint(elapsedSeconds: 2.0, forceGrams: 3800),
-        DynoDataPoint(elapsedSeconds: 3.0, forceGrams: 4900),
+        DynoDataPoint(rpm: 2000, torqueNm: 45.0),
+        DynoDataPoint(rpm: 3500, torqueNm: 82.0),
+        DynoDataPoint(rpm: 5000, torqueNm: 60.0),
     ]
 
     return StatsView(session: session)

@@ -70,27 +70,27 @@ struct SessionRow: View {
             
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Peak Force")
+                    Text("Peak Torque")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(session.peakForce, specifier: "%.0f") g")
+                    Text("\(session.peakTorque, specifier: "%.1f") Nm")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundStyle(.red)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Avg Force")
+                    Text("Peak Power")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(session.averageForce, specifier: "%.0f") g")
+                    Text("\(session.peakPower, specifier: "%.1f") hp")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.blue)
                 }
-                
+
                 Spacer()
-                
+
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("\(session.dataPoints.count)")
                         .font(.title3)
@@ -217,7 +217,7 @@ struct InfoRow: View {
     let viewModel = DynoViewModel()
     viewModel.generateTestData()
     viewModel.savedSessions.append(viewModel.currentSession)
-    
+
     return NavigationStack {
         SavedSessionsView(viewModel: viewModel)
     }

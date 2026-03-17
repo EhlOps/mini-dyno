@@ -25,9 +25,9 @@ class DynoViewModel {
         self.devicePingURL = devicePingURL
         self.networkMonitor = NetworkMonitor(deviceURL: devicePingURL)
 
-        // Set up the callback: firmware sends weightGrams and deviceTimestampMs
-        webSocketService.onDataReceived = { [weak self] weightGrams, _ in
-            self?.addDataPoint(forceGrams: weightGrams)
+        // Firmware sends torqueNm and rpm
+        webSocketService.onDataReceived = { [weak self] torqueNm, rpm in
+            self?.addDataPoint(torqueNm: torqueNm, rpm: rpm)
         }
     }
 
@@ -59,18 +59,14 @@ class DynoViewModel {
         }
     }
 
-    func addDataPoint(forceGrams: Double) {
+    func addDataPoint(torqueNm: Double, rpm: Double) {
         guard currentSession.isRecording else { return }
 
-        let now = Date()
-        let elapsed = currentSession.startTime.map { now.timeIntervalSince($0) } ?? 0
-
         let point = DynoDataPoint(
-            timestamp: now,
-            elapsedSeconds: elapsed,
-            forceGrams: forceGrams
+            timestamp: Date(),
+            rpm: rpm,
+            torqueNm: torqueNm
         )
-
         currentSession.dataPoints.append(point)
     }
 
@@ -89,18 +85,18 @@ class DynoViewModel {
         currentSession.startTime = Date()
         currentSession.isRecording = true
 
-        // Simulate a 10-second load cell pull with a peak around 5 s
+        // Simulate a dyno pull from 1000 to 6000 RPM.
+        // Torque peaks around 3500 RPM with a Gaussian curve shape.
         for i in 0...50 {
-            let t = Double(i) * 0.2
-            let peak = 5.0
-            let maxForce = 5000.0
-            let width = 8.0
-            let force = maxForce * exp(-pow(t - peak, 2) / width)
+            let rpm       = 1000.0 + Double(i) * 100.0   // 1000 → 6000 RPM
+            let peakRPM   = 3500.0
+            let maxTorque = 85.0                          // Nm
+            let torque    = maxTorque * exp(-pow(rpm - peakRPM, 2) / 3_000_000.0)
 
             let point = DynoDataPoint(
-                timestamp: (currentSession.startTime ?? Date()).addingTimeInterval(t),
-                elapsedSeconds: t,
-                forceGrams: max(force, 100)
+                timestamp: (currentSession.startTime ?? Date()).addingTimeInterval(Double(i) * 0.2),
+                rpm: rpm,
+                torqueNm: max(torque, 5.0)
             )
             currentSession.dataPoints.append(point)
         }

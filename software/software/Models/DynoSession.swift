@@ -15,17 +15,25 @@ class DynoSession: Identifiable, Codable {
     var dataPoints: [DynoDataPoint]
     var isRecording: Bool
 
-    var peakForce: Double {
-        dataPoints.map { $0.forceGrams }.max() ?? 0
+    var peakTorque: Double {
+        dataPoints.map { $0.torqueNm }.max() ?? 0
     }
 
-    var timeAtPeakForce: Double {
-        dataPoints.max(by: { $0.forceGrams < $1.forceGrams })?.elapsedSeconds ?? 0
+    var peakPower: Double {
+        dataPoints.map { $0.powerHp }.max() ?? 0
     }
 
-    var averageForce: Double {
+    var rpmAtPeakTorque: Double {
+        dataPoints.max(by: { $0.torqueNm < $1.torqueNm })?.rpm ?? 0
+    }
+
+    var rpmAtPeakPower: Double {
+        dataPoints.max(by: { $0.powerHp < $1.powerHp })?.rpm ?? 0
+    }
+
+    var averageTorque: Double {
         guard !dataPoints.isEmpty else { return 0 }
-        return dataPoints.reduce(0.0) { $0 + $1.forceGrams } / Double(dataPoints.count)
+        return dataPoints.reduce(0.0) { $0 + $1.torqueNm } / Double(dataPoints.count)
     }
 
     var duration: TimeInterval? {

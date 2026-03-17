@@ -34,37 +34,37 @@ struct DetailedStatsView: View {
                     }
                     .padding(.top)
 
-                    // Peak Force Section
+                    // Peak Performance Section
                     VStack(spacing: 16) {
                         SectionHeader(title: "Peak Performance", icon: "bolt.fill")
 
                         HStack(spacing: 16) {
                             DetailedStatCard(
-                                title: "Peak Force",
-                                value: String(format: "%.0f", session.peakForce),
-                                unit: "g",
+                                title: "Peak Torque",
+                                value: String(format: "%.1f", session.peakTorque),
+                                unit: "Nm",
                                 color: .red,
                                 icon: "gauge.high"
                             )
 
                             DetailedStatCard(
-                                title: "Avg Force",
-                                value: String(format: "%.0f", session.averageForce),
-                                unit: "g",
-                                color: .orange,
-                                icon: "equal.circle"
+                                title: "Peak Power",
+                                value: String(format: "%.1f", session.peakPower),
+                                unit: "hp",
+                                color: .blue,
+                                icon: "bolt.circle"
                             )
                         }
                     }
 
-                    // Load Details Section
+                    // RPM Details Section
                     VStack(spacing: 16) {
-                        SectionHeader(title: "Load Details", icon: "waveform.path.ecg")
+                        SectionHeader(title: "RPM Details", icon: "waveform.path.ecg")
 
                         VStack(spacing: 12) {
                             DetailRow(
-                                label: "Peak Force at",
-                                value: String(format: "%.2f s", session.timeAtPeakForce),
+                                label: "RPM at Peak Torque",
+                                value: String(format: "%.0f RPM", session.rpmAtPeakTorque),
                                 icon: "speedometer",
                                 color: .red
                             )
@@ -72,10 +72,19 @@ struct DetailedStatsView: View {
                             Divider()
 
                             DetailRow(
-                                label: "Time Range",
-                                value: timeRange,
-                                icon: "arrow.left.and.right",
-                                color: .green
+                                label: "RPM at Peak Power",
+                                value: String(format: "%.0f RPM", session.rpmAtPeakPower),
+                                icon: "speedometer",
+                                color: .blue
+                            )
+
+                            Divider()
+
+                            DetailRow(
+                                label: "Avg Torque",
+                                value: String(format: "%.1f Nm", session.averageTorque),
+                                icon: "equal.circle",
+                                color: .orange
                             )
                         }
                         .padding()
@@ -142,13 +151,6 @@ struct DetailedStatsView: View {
     }
 
     // MARK: - Computed Properties
-
-    private var timeRange: String {
-        guard !session.dataPoints.isEmpty else { return "N/A" }
-        let first = session.dataPoints.first!.elapsedSeconds
-        let last = session.dataPoints.last!.elapsedSeconds
-        return String(format: "%.1f – %.1f s", first, last)
-    }
 
     private var runDuration: String {
         guard !session.dataPoints.isEmpty,
@@ -241,9 +243,9 @@ struct DetailRow: View {
 #Preview {
     let session = DynoSession()
     session.dataPoints = [
-        DynoDataPoint(elapsedSeconds: 1.0, forceGrams: 1200),
-        DynoDataPoint(elapsedSeconds: 2.0, forceGrams: 3800),
-        DynoDataPoint(elapsedSeconds: 3.0, forceGrams: 4900),
+        DynoDataPoint(rpm: 2000, torqueNm: 45.0),
+        DynoDataPoint(rpm: 3500, torqueNm: 82.0),
+        DynoDataPoint(rpm: 5000, torqueNm: 60.0),
     ]
 
     return DetailedStatsView(session: session)

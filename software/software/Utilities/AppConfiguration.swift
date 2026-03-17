@@ -82,9 +82,11 @@ struct AppConfiguration {
     struct TestData {
         static let durationSeconds: Double = 10.0
         static let sampleInterval: Double = 0.2
-        static let peakForceGrams: Double = 5000
-        static let minForceGrams: Double = 100
-        static let peakTimeSeconds: Double = 5.0
+        static let minRPM: Double = 1000
+        static let maxRPM: Double = 6000
+        static let peakTorqueNm: Double = 85.0
+        static let minTorqueNm: Double = 5.0
+        static let peakRPM: Double = 3500.0
     }
 
 
@@ -99,9 +101,14 @@ struct AppConfiguration {
     
     // MARK: - Validation
 
-    /// Validates a force reading from the load cell
-    static func isValidForce(_ grams: Double) -> Bool {
-        return grams >= 0 && grams <= 100_000
+    /// Validates a torque reading in Newton-metres
+    static func isValidTorque(_ nm: Double) -> Bool {
+        return nm >= 0 && nm <= 10_000
+    }
+
+    /// Validates an RPM reading
+    static func isValidRPM(_ rpm: Double) -> Bool {
+        return rpm >= 0 && rpm <= 100_000
     }
 
     // MARK: - User Defaults Keys
@@ -138,28 +145,28 @@ extension AppConfiguration {
 // MARK: - Usage Examples
 
 /*
- 
+
  // In NetworkMonitor:
  try? await Task.sleep(for: .seconds(AppConfiguration.networkPollingInterval))
- 
+
  // In DynoDataPoint:
- var horsePower: Double {
-     (torque * rpm) / AppConfiguration.torqueToHPConversion
+ var powerHp: Double {
+     (torqueNm * rpm * 2.0 * .pi / 60.0) / 745.7
  }
- 
+
  // In DynoViewModel:
- if AppConfiguration.isValidDataPoint(point) {
+ if AppConfiguration.isValidTorque(point.torqueNm) && AppConfiguration.isValidRPM(point.rpm) {
      currentSession.dataPoints.append(point)
  }
- 
+
  // In ExportService:
  let url = path.appendingPathComponent("\(AppConfiguration.Export.csvPrefix)\(date).\(AppConfiguration.Export.fileExtensionCSV)")
- 
+
  // In ContentView:
  #if DEBUG
  if AppConfiguration.enableTestDataButton {
      Button("Generate Test Data") { ... }
  }
  #endif
- 
+
  */

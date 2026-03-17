@@ -11,9 +11,13 @@ import Charts
 struct DynoGraphView: View {
     let dataPoints: [DynoDataPoint]
 
+    private var sortedPoints: [DynoDataPoint] {
+        dataPoints.sorted { $0.rpm < $1.rpm }
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Force vs Time")
+            Text("Torque & Power vs RPM")
                 .font(.headline)
                 .padding(.leading)
 
@@ -21,31 +25,38 @@ struct DynoGraphView: View {
                 ContentUnavailableView(
                     "No Data",
                     systemImage: "chart.line.uptrend.xyaxis",
-                    description: Text("Start recording to see load cell data")
+                    description: Text("Start recording to see dyno data")
                 )
             } else {
                 Chart {
-                    ForEach(dataPoints) { point in
+                    ForEach(sortedPoints) { point in
                         LineMark(
-                            x: .value("Time (s)", point.elapsedSeconds),
-                            y: .value("Force (g)", point.forceGrams)
+                            x: .value("RPM", point.rpm),
+                            y: .value("Value", point.torqueNm)
                         )
-                        .foregroundStyle(.red)
-                        .symbol {
-                            Circle()
-                                .fill(.red)
-                                .frame(width: 4, height: 4)
-                        }
+                        .foregroundStyle(by: .value("Series", "Torque (Nm)"))
+                        .interpolationMethod(.catmullRom)
+                    }
+                    ForEach(sortedPoints) { point in
+                        LineMark(
+                            x: .value("RPM", point.rpm),
+                            y: .value("Value", point.powerHp)
+                        )
+                        .foregroundStyle(by: .value("Series", "Power (hp)"))
                         .interpolationMethod(.catmullRom)
                     }
                 }
+                .chartForegroundStyleScale([
+                    "Torque (Nm)": Color.red,
+                    "Power (hp)":  Color.blue
+                ])
                 .chartXAxis {
                     AxisMarks(position: .bottom) { value in
                         AxisGridLine()
                         AxisTick()
                         AxisValueLabel {
-                            if let t = value.as(Double.self) {
-                                Text(String(format: "%.1f", t))
+                            if let rpm = value.as(Double.self) {
+                                Text("\(Int(rpm))")
                                     .font(.caption)
                             }
                         }
@@ -57,14 +68,14 @@ struct DynoGraphView: View {
                         AxisTick()
                         AxisValueLabel {
                             if let val = value.as(Double.self) {
-                                Text("\(Int(val))")
+                                Text(String(format: "%.0f", val))
                                     .font(.caption)
                             }
                         }
                     }
                 }
-                .chartXAxisLabel("Time (s)", alignment: .center)
-                .chartYAxisLabel("Force (g)", alignment: .leading)
+                .chartXAxisLabel("RPM", alignment: .center)
+                .chartYAxisLabel("Torque (Nm) / Power (hp)", alignment: .leading)
                 .padding()
             }
         }
@@ -73,13 +84,12 @@ struct DynoGraphView: View {
 
 #Preview {
     let sampleData: [DynoDataPoint] = (0...50).map { i in
-        let t = Double(i) * 0.2
-        let peak = 5.0
-        let force = 5000.0 * exp(-pow(t - peak, 2) / 8.0)
+        let rpm     = 1000.0 + Double(i) * 100.0
+        let torque  = 85.0 * exp(-pow(rpm - 3500.0, 2) / 3_000_000.0)
         return DynoDataPoint(
             timestamp: Date(),
-            elapsedSeconds: t,
-            forceGrams: max(force, 100)
+            rpm: rpm,
+            torqueNm: max(torque, 5.0)
         )
     }
 

@@ -1,0 +1,19 @@
+menu "Hall Effect Sensor"
+
+    config HALL_SENSOR_DEFAULT_GPIO
+        int "Default GPIO for Hall sensor input"
+        default 10
+        range 0 21
+        help
+            GPIO pin connected to the Hall effect sensor output.
+            The pin is configured as an input with an internal pull-up.
+
+    config HALL_SENSOR_PULSES_PER_REV
+        int "Pulses per revolution"
+        default 4
+        range 1 32
+        help
+            Number of magnets (pulses) per full revolution of the rotor.
+            Set this to match the number of magnets mounted on the water brake.
+
+endmenu

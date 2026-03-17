@@ -10,13 +10,19 @@ import Foundation
 struct DynoDataPoint: Identifiable, Codable {
     let id: UUID
     let timestamp: Date
-    let elapsedSeconds: Double  // seconds from session start
-    let forceGrams: Double       // load cell reading in grams
+    let rpm: Double         // engine speed in RPM
+    let torqueNm: Double    // torque in Newton-metres
 
-    init(id: UUID = UUID(), timestamp: Date = Date(), elapsedSeconds: Double, forceGrams: Double) {
+    var powerHp: Double {
+        // P (W) = τ (Nm) × ω (rad/s) = τ × (2π × RPM / 60)
+        // P (hp) = P (W) / 745.7
+        (torqueNm * rpm * 2.0 * .pi / 60.0) / 745.7
+    }
+
+    init(id: UUID = UUID(), timestamp: Date = Date(), rpm: Double, torqueNm: Double) {
         self.id = id
         self.timestamp = timestamp
-        self.elapsedSeconds = elapsedSeconds
-        self.forceGrams = forceGrams
+        self.rpm = rpm
+        self.torqueNm = torqueNm
     }
 }

@@ -12,20 +12,21 @@ struct DataExporter {
 
     // Export CSV
     static func exportCSV(session: DynoSession) -> URL? {
-        var csvText = "Timestamp,Elapsed (s),Force (g)\n"
+        var csvText = "Timestamp,RPM,Torque (Nm),Power (hp)\n"
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss.SSS"
 
         for point in session.dataPoints {
             let timestamp = dateFormatter.string(from: point.timestamp)
-            csvText.append("\(timestamp),\(point.elapsedSeconds),\(point.forceGrams)\n")
+            csvText.append("\(timestamp),\(point.rpm),\(point.torqueNm),\(String(format: "%.2f", point.powerHp))\n")
         }
 
         csvText.append("\nSummary\n")
-        csvText.append("Peak Force (g),\(session.peakForce)\n")
-        csvText.append("Avg Force (g),\(session.averageForce)\n")
-        csvText.append("Time at Peak Force (s),\(session.timeAtPeakForce)\n")
+        csvText.append("Peak Torque (Nm),\(session.peakTorque)\n")
+        csvText.append("Peak Power (hp),\(String(format: "%.2f", session.peakPower))\n")
+        csvText.append("RPM at Peak Torque,\(session.rpmAtPeakTorque)\n")
+        csvText.append("RPM at Peak Power,\(session.rpmAtPeakPower)\n")
 
         let dateFormatter2 = DateFormatter()
         dateFormatter2.dateFormat = "yyyy-MM-dd_HH-mm-ss"

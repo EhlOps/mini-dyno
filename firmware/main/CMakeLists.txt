@@ -6,4 +6,5 @@ idf_component_register(
     REQUIRES
         hx711
         wifi_ap
+        hall_sensor
 )
