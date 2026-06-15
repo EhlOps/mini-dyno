@@ -1,91 +1,78 @@
-# Mini Dyno — Firmware
+# mini-dyno firmware
 
-ESP-IDF firmware for the ESP32-C3 that reads a load cell and Hall effect RPM sensor, converts the measurements to torque and RPM, and streams them over a WebSocket to the iOS app.
+Firmware for the **mini-dyno**, a small water-brake dynamometer. It runs on an
+**ESP32-C3**, stands up an open Wi-Fi access point, and serves live torque/RPM
+telemetry to connected clients over a tiny built-in MQTT broker. A phone or
+laptop joins the AP, subscribes, and plots the dyno run in real time.
 
-## Requirements
+Written in async Rust (`no_std`) on [`esp-hal`] and [`embassy`].
 
-- ESP-IDF v5.x
-- ESP32-C3 target (`idf.py set-target esp32c3`)
+[`esp-hal`]: https://docs.rs/esp-hal
+[`embassy`]: https://embassy.dev
 
-## Wiring
+## Read the docs (the guided tour)
 
-| Signal | GPIO |
-|---|---|
-| HX711 PD_SCK (clock) | 7 |
-| HX711 DOUT (data) | 6 |
-| Hall effect sensor | 10 |
-| Ready LED | 5 |
+The whole codebase is documented as rustdoc — the module headers read top to
+bottom as an explanation of *why* the firmware is shaped the way it is. The
+best way to understand it is to generate the docs and browse them:
 
-The load cell is mounted **100 mm** from the water brake shaft centre. The Hall sensor detects **4 magnets** spaced 90° apart on the rotor. The ready LED turns on once WiFi, HX711, and Hall sensor initialisation are all complete and the system is actively streaming.
-
-## Build & Flash
-
-```bash
-cd firmware
-idf.py set-target esp32c3
-idf.py build
-idf.py -p /dev/ttyUSBx flash monitor
+```sh
+cargo doc --no-deps --open
 ```
 
-## Calibration
+This builds the API docs for just this crate and opens them in your browser
+(`target/riscv32imc-unknown-none-elf/doc/firmware/index.html`). Drop
+`--no-deps` if you also want the docs for `esp-hal`, `embassy`, `smoltcp`, etc.
+linked inline — that's a much bigger build, but every type cross-links to its
+upstream definition.
 
-The `CALIBRATION_SCALE` constant in `main/main.c` converts raw HX711 counts to grams:
+Suggested reading order, following the links as you go:
 
-1. Flash and let the scale tare (no load at power-on).
-2. Place a known weight on the load cell.
-3. Run `idf.py monitor` and note the raw value from `hx711_read_average()`.
-4. Compute: `scale = (raw − offset) / known_weight_grams`
-5. Update `CALIBRATION_SCALE` and reflash.
+1. **`firmware`** (crate root) — the one-paragraph map of the three modules.
+2. **`firmware::net`** — bringing up the Wi-Fi AP and the `embassy-net` stack;
+   start with the `Net` type.
+3. **`firmware::net::mqtt`** — the payload-agnostic MQTT 3.1.1/5 broker, its
+   concurrency model (`Feed` / `Watch`), and the per-connection state machine.
+4. **`firmware::telemetry`** — the `Telemetry` sample type, its JSON wire
+   format, and the producer task that feeds the broker.
+5. **`firmware::macros`** — `mk_static!`, the `'static`-allocation helper the
+   embassy tasks lean on.
 
-## WebSocket Output
+> The binary entry point (`src/bin/main.rs`) is a separate bin crate, so it
+> isn't part of the `firmware` library docs above. Its boot sequence is
+> documented in the file's own `//!` header.
 
-The device runs a WiFi access point (`mini-dyno`, open network, `192.168.4.1`) and streams JSON frames to `ws://192.168.4.1/ws` at **50 Hz**:
+## Build & flash
 
-```json
-{"torque": 12.45, "rpm": 3200}
+Prerequisites:
+
+- A Rust toolchain — the pinned channel and the RISC-V target are declared in
+  [`rust-toolchain.toml`](rust-toolchain.toml) and installed automatically by `rustup`.
+- [`espflash`](https://github.com/esp-rs/espflash) (`cargo install espflash`)
+  for flashing over USB; it's already wired up as the cargo runner.
+
+```sh
+cargo build --release        # compile
+cargo run                    # flash + monitor (defmt) over USB
+cargo run --release          # same, optimized
 ```
 
-| Field | Unit | Description |
-|---|---|---|
-| `torque` | Nm | Torque = Force (N) × 0.1 m arm |
-| `rpm` | RPM | Engine speed from Hall sensor |
+The target (`riscv32imc-unknown-none-elf`) and the `espflash` runner are
+configured in [`.cargo/config.toml`](.cargo/config.toml), so plain `cargo run`
+just works. You can also simulate the firmware without hardware via
+[Wokwi](https://wokwi.com) — see [`wokwi.toml`](wokwi.toml) and
+[`diagram.json`](diagram.json).
 
-A `/ping` endpoint (`http://192.168.4.1/ping`) returns `pong` and is used by the iOS app for connection monitoring.
+## Connecting a client
 
-## Component Overview
+1. Join the open Wi-Fi network **`mini-dyno`**.
+2. Point an MQTT client at `192.168.1.1:1883` and subscribe to `dyno/telemetry`.
+3. You'll receive a JSON payload per sample: `{"torque":<n.nn>,"rpm":<n>}`.
 
-### `components/hx711`
-Thread-safe driver for the HX711 24-bit ADC. Uses a FreeRTOS mutex for task-level safety and a `portMUX` spinlock for bit-bang timing. Key API:
+## Status
 
-```c
-hx711_init(), hx711_tare(), hx711_set_scale(), hx711_get_units()
-```
-
-### `components/hall_sensor`
-Driver for a digital Hall effect sensor. A rising-edge GPIO interrupt timestamps each magnet pass using `esp_timer_get_time()`. RPM is computed from a rolling window of the last 8 pulse timestamps. Returns `0.0` if no pulse has arrived in the last 500 ms (engine stalled). Key API:
-
-```c
-hall_sensor_init(), hall_sensor_get_rpm()
-```
-
-### `components/wifi_ap`
-WiFi access point + HTTP server with WebSocket support. The broadcast is non-blocking (`httpd_queue_work` pattern). Key API:
-
-```c
-wifi_ap_init(), wifi_ap_ws_broadcast()
-```
-
-## Project Structure
-
-```
-firmware/
-├── CMakeLists.txt
-├── sdkconfig.defaults          (enables CONFIG_HTTPD_WS_SUPPORT)
-├── main/
-│   ├── CMakeLists.txt
-│   └── main.c                  (app_main, HX711 loop, broadcast task)
-└── components/
-    ├── hx711/                  (load cell ADC driver)
-    ├── hall_sensor/            (Hall effect RPM driver)
-    └── wifi_ap/                (WiFi AP + WebSocket server)
-```
+The telemetry producer currently **synthesizes** a sweeping torque/RPM curve so
+the networking and broker path can be exercised end to end. Replace the body of
+`telemetry::producer` with real HX711 load-cell and hall-effect RPM reads once
+those drivers are ported to Rust. (See the prior ESP-IDF/C drivers in git
+history for the sensor logic.)
