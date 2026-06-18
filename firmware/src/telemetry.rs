@@ -5,6 +5,8 @@
 //! itself ([`crate::net::mqtt`]) is content-agnostic — it ships whatever bytes
 //! land on its [`Feed`]; everything torque/RPM-specific lives here.
 
+use crate::drivers::hall_effect::RPMSignal;
+use crate::drivers::hx711::LoadCellSignal;
 use crate::net::mqtt::{Feed, Payload};
 use core::fmt::Write;
 use embassy_executor::Spawner;
@@ -29,34 +31,53 @@ impl Telemetry {
     fn to_payload(self) -> Payload {
         let mut payload = Payload::new();
         // Infallible for this format: it is far shorter than PAYLOAD_CAP.
-        let _ = write!(payload, "{{\"torque\":{:.2},\"rpm\":{:.0}}}", self.torque, self.rpm);
+        let _ = write!(
+            payload,
+            "{{\"torque\":{:.2},\"rpm\":{:.0}}}",
+            self.torque, self.rpm
+        );
         payload
     }
 }
 
 /// Spawns the telemetry producer, pushing samples onto `feed`.
-pub fn start(spawner: Spawner, feed: &'static Feed) {
-    spawner.spawn(producer(feed).unwrap());
+pub fn start(
+    spawner: Spawner,
+    feed: &'static Feed,
+    load_cell: &'static LoadCellSignal,
+    rpm: &'static RPMSignal,
+) {
+    spawner.spawn(producer(feed, load_cell, rpm).unwrap());
 }
 
 /// Feeds the broker with telemetry samples at [`SAMPLE_PERIOD`].
 ///
-/// PLACEHOLDER: this currently synthesizes a sweeping torque/RPM curve so the
-/// broker can be exercised end-to-end. Replace the body with real HX711
-/// load-cell and hall-effect RPM reads once those drivers are ported to Rust.
+/// Paced by fresh load-cell samples; the hall-effect RPM signal updates on its
+/// own (slower) cadence, so we latch its latest value non-blockingly and reuse
+/// it between updates.
 #[embassy_executor::task]
-async fn producer(feed: &'static Feed) {
+async fn producer(
+    feed: &'static Feed,
+    load_cell: &'static LoadCellSignal,
+    rpm: &'static RPMSignal,
+) {
     let sender = feed.sender();
-    let mut tick: u32 = 0;
+    let mut last_rpm: u32 = 0;
     loop {
-        let phase = (tick % 200) as f32 / 200.0; // 0..1 sweep over ~4 s
+        let torque = load_cell.wait().await as f32; // Placeholder: interpret the raw HX711 sample as torque.
+
+        // RPM arrives slower than load-cell samples; take the latest if there
+        // is one, otherwise carry the previous reading forward.
+        if let Some(fresh) = rpm.try_take() {
+            last_rpm = fresh;
+        }
+
         let sample = Telemetry {
-            torque: 20.0 + 15.0 * phase,
-            rpm: 1000.0 + 7000.0 * phase,
+            torque,
+            rpm: last_rpm as f32,
         };
         sender.send(sample.to_payload());
 
-        tick = tick.wrapping_add(1);
         Timer::after(SAMPLE_PERIOD).await;
     }
 }

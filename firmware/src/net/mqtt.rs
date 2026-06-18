@@ -53,7 +53,7 @@ use embedded_io_async::{Read, Write};
 /// Maximum number of simultaneously connected MQTT clients.
 ///
 /// This bounds both the connection-task pool and the number of [`Feed`]
-/// receivers, and feeds [`SOCKETS`](super::SOCKETS) so the network stack has a
+/// receivers, and feeds `SOCKETS` (in the parent module) so the network stack has a
 /// TCP slot for each client.
 pub const MAX_CLIENTS: usize = 4;
 

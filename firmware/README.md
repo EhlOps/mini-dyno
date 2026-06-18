@@ -28,14 +28,18 @@ upstream definition.
 
 Suggested reading order, following the links as you go:
 
-1. **`firmware`** (crate root) — the one-paragraph map of the three modules.
+1. **`firmware`** (crate root) — the one-paragraph map of the modules.
 2. **`firmware::net`** — bringing up the Wi-Fi AP and the `embassy-net` stack;
    start with the `Net` type.
 3. **`firmware::net::mqtt`** — the payload-agnostic MQTT 3.1.1/5 broker, its
    concurrency model (`Feed` / `Watch`), and the per-connection state machine.
-4. **`firmware::telemetry`** — the `Telemetry` sample type, its JSON wire
-   format, and the producer task that feeds the broker.
-5. **`firmware::macros`** — `mk_static!`, the `'static`-allocation helper the
+4. **`firmware::drivers`** — the sensor drivers and their read loops:
+   `drivers::hx711` (load-cell ADC, bit-banged) and `drivers::hall_effect`
+   (interrupt-driven RPM pickup), each republishing on a `Signal`.
+5. **`firmware::telemetry`** — the `Telemetry` sample type, its JSON wire
+   format, and the producer task that latches the driver signals and feeds the
+   broker.
+6. **`firmware::macros`** — `mk_static!`, the `'static`-allocation helper the
    embassy tasks lean on.
 
 > The binary entry point (`src/bin/main.rs`) is a separate bin crate, so it
@@ -71,8 +75,9 @@ just works. You can also simulate the firmware without hardware via
 
 ## Status
 
-The telemetry producer currently **synthesizes** a sweeping torque/RPM curve so
-the networking and broker path can be exercised end to end. Replace the body of
-`telemetry::producer` with real HX711 load-cell and hall-effect RPM reads once
-those drivers are ported to Rust. (See the prior ESP-IDF/C drivers in git
-history for the sensor logic.)
+Both sensors are wired in and read live: the hall-effect driver
+(`drivers::hall_effect`, GPIO10) reports real RPM, and the HX711 load-cell
+driver (`drivers::hx711`, GPIO6/7) streams real ADC samples. **Calibration is
+still pending** — `telemetry::producer` currently passes the raw 24-bit HX711
+word straight through as the `torque` field, so that number is a placeholder
+until an offset/scale (tare + N·m per count) is applied.

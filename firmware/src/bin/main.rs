@@ -17,21 +17,30 @@
 //!    point and a static IPv4 stack at `192.168.1.1`.
 //! 2. [`mqtt::start`](firmware::net::mqtt::start) launches the MQTT broker on
 //!    TCP `1883`, publishing under [`telemetry::TOPIC`](firmware::telemetry::TOPIC).
-//! 3. [`telemetry::start`](firmware::telemetry::start) spawns the producer that
-//!    pushes torque/RPM samples onto the shared [`Feed`].
+//! 3. The sensor read loops
+//!    ([`hx711_read_loop`](firmware::drivers::hx711_read_loop) on GPIO6/7 and
+//!    [`hall_effect_read_loop`](firmware::drivers::hall_effect_read_loop) on
+//!    GPIO10) are spawned, each publishing its latest reading on a `Signal`.
+//! 4. [`telemetry::start`](firmware::telemetry::start) spawns the producer that
+//!    latches those signals and pushes torque/RPM samples onto the shared
+//!    [`Feed`].
 //!
 //! After setup `main` idles forever; all real work runs in the spawned tasks.
 
+use core::future;
 use defmt::{error, info};
 use embassy_executor::Spawner;
-use embassy_time::{Duration, Timer};
 use esp_hal::clock::CpuClock;
+use esp_hal::gpio::Io;
 use esp_hal::timer::timg::TimerGroup;
 use esp_println as _;
 use firmware::mk_static;
 use firmware::net::Net;
 use firmware::net::mqtt::{self, Feed};
 use firmware::telemetry;
+use firmware::drivers::hall_effect::{HallEffectSensor, RPMSignal};
+use firmware::drivers::hx711::{HX711, LoadCellSignal};
+use firmware::drivers::{hall_effect_read_loop, hx711_read_loop};
 
 #[panic_handler]
 fn panic(panic_info: &core::panic::PanicInfo) -> ! {
@@ -70,8 +79,8 @@ async fn main(spawner: Spawner) -> ! {
     let net = Net::new(peripherals.WIFI, "mini-dyno", "192.168.1.1");
     let stack = net.run(spawner).await;
 
-    // Bring up the MQTT 5 broker and the telemetry feed it serves. Clients
-    // connect to tcp 192.168.1.1:1883 and subscribe to "dyno/telemetry".
+    // Bring up the MQTT broker (3.1.1/5) and the telemetry feed it serves.
+    // Clients connect to tcp 192.168.1.1:1883 and subscribe to "dyno/telemetry".
     let feed = mk_static!(Feed, Feed::new());
     mqtt::start(
         spawner,
@@ -82,9 +91,22 @@ async fn main(spawner: Spawner) -> ! {
             topic: telemetry::TOPIC,
         },
     );
-    telemetry::start(spawner, feed);
 
-    loop {
-        Timer::after(Duration::from_secs(1)).await;
-    }
+    let hx711 = mk_static!(HX711, HX711::new(peripherals.GPIO6, peripherals.GPIO7));
+    let lc_sig = mk_static!(LoadCellSignal, LoadCellSignal::new());
+    spawner.spawn(hx711_read_loop(hx711, lc_sig).unwrap());
+
+    let mut io = Io::new(peripherals.IO_MUX);
+    let hall = mk_static!(
+        HallEffectSensor,
+        HallEffectSensor::new(&mut io, peripherals.GPIO10, 4)
+    );
+    let rpm_sig = mk_static!(RPMSignal, RPMSignal::new());
+    spawner.spawn(hall_effect_read_loop(hall, rpm_sig).unwrap());
+
+    telemetry::start(spawner, feed, lc_sig, rpm_sig);
+
+    // All real work runs in the spawned tasks above. Park main forever: this
+    // future never resolves, so it satisfies `-> !` without ever waking the CPU.
+    future::pending().await
 }
